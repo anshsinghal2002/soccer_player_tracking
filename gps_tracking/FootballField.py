@@ -132,12 +132,9 @@ class FootballField:
 
     def animate_field(self, path,speed_up=1):
  
-        # Initialize figure and axis
-        fig, ax = plt.subplots()
-
         # Function to update each frame
         def update(frame):
-            ax.clear()
+            self.ax.clear()
             minutes = int(frame // 60)
             seconds = int(frame % 60)
             minute_second = "{:02d}:{:02d}".format(minutes, seconds)
@@ -149,13 +146,13 @@ class FootballField:
         interval = 1000 // (30 * speed_up)  # Adjust interval for speed up
 
         # Create animation
-        anim = animation.FuncAnimation(fig, update, frames=frames, interval=interval, repeat=False)
+        anim = animation.FuncAnimation(self.fig, update, frames=frames, interval=interval, repeat=False)
         # plt.show()
         # Set up formatting for the movie files
-        # writer = animation.writers['ffmpeg'](fps=30*speed_up)
+        writer = animation.writers['ffmpeg'](fps=30*speed_up)
 
-        # # Save animation
-        # anim.save(path, writer=writer)
+        # Save animation
+        anim.save(path, writer=writer)
 
 if __name__=="__main__":
     # Example usage:
