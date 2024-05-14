@@ -151,7 +151,7 @@ class FootballField:
 
         # Calculate frames and interval
 
-        frames = self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x)).min()
+        frames = self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x)).max()
         print ("Total Frames: ",frames)
         interval = 1000 // (30 * speed_up)  # Adjust interval for speed up
 
