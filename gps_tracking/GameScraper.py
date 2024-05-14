@@ -4,7 +4,9 @@ from Player import Player
 import pandas as pd
 
 class GameScraper():
-    def game_scraper(token,id_range,game_date,field,init_time):
+    def __init__(self) -> None:
+        pass
+    def game_scraper(self,token,id_range,game_date,field,init_time):
         url = "https://apius.playertek.com//webinterface/RawDataService.php?token="+token+"&sessionID="
         for session_id in id_range:
             sp_url = url+str(session_id)
@@ -20,7 +22,7 @@ class GameScraper():
                     # if player_to_add.game_date==game_date:
                     field.add_player_data(player_to_add)
                 except Exception as e:
-                    # print ('error',e)
+                    print ('error',e)
                     pass
             else:
                 print("Failed to fetch data:", response.status_code)

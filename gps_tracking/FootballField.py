@@ -129,7 +129,15 @@ class FootballField:
         xy = self.coordinate_frame.loc[self.coordinate_frame['Minute:Second'] == time_stamp][player_name].values
         self.ax.plot([x for x,_ in xy],[y for _,y in xy], marker='.', markersize=10, linestyle='-', linewidth=1, label=player_name)
 
-
+    def timestamp_to_seconds(self,x):
+        mins,seconds=x.split(':')
+        mins=int(mins)
+        seconds=int(seconds)
+        if x[0]=='-':
+            return mins*60-seconds
+        else:
+            return mins*60+seconds
+        
     def animate_field(self, path,speed_up=1):
  
         # Function to update each frame
@@ -142,7 +150,9 @@ class FootballField:
             self.draw_field_at_time(minute_second,show=False)
 
         # Calculate frames and interval
-        frames = 100 #len(self.coordinate_frame)
+
+        frames = self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x)).min()
+        print ("Total Frames: ",frames)
         interval = 1000 // (30 * speed_up)  # Adjust interval for speed up
 
         # Create animation
