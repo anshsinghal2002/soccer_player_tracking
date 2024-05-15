@@ -49,6 +49,6 @@ if __name__=="__main__":
     # test_field_animation()
     # cph_field = test_scraping(load_config()['TOKEN'])
     # save(cph_field,'sample_filled_field_cph.pkl')
-    f = open('sample_filled_field_cph.pkl','rb')
+    f = open('./gps_tracking/sample_filled_field_cph.pkl','rb')
     cph_field = pickle.load(f)
     cph_field.animate_field('cph_vs_acp.mp4')
