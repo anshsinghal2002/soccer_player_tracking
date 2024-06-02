@@ -29,32 +29,30 @@ class GameScraper():
                 print("Failed to fetch data:", response.status_code)
     
     def play_by_play_scraper(self,game_link="https://unionathletics.com/sports/mens-soccer/stats/2023/-15-suny-oneonta/boxscore/25179"):
-        html_table = etract_table()
+        html_table = self.extract_table(game_link)
+        self.parse_html_table(html_table)
 
+    def extract_table(self,game_link):
+        pass
+    def parse_html_table(self,html):
+        soup = BeautifulSoup(html, 'html.parser')
+        rows = soup.find_all('tr')
 
+        data = []
+        for row in rows:
+            cols = row.find_all('td')
+            cols = [col.text.strip() for col in cols]
+            data.append(cols)
 
-def parse_html_table(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    rows = soup.find_all('tr')
-
-    data = []
-    for row in rows:
-        cols = row.find_all('td')
-        cols = [col.text.strip() for col in cols]
-        data.append(cols)
-
-    df = pd.DataFrame(data)
-    df = df.rename(columns={0: 'Time_Stamp', 1: 'Action'})
-    df['For_or_Against'] = df['Action'].str.contains('UNION')
-    return df[['Time_Stamp', 'Action', 'For_or_Against']]
+        df = pd.DataFrame(data)
+        df = df.rename(columns={0: 'Time_Stamp', 1: 'Action'})
+        df['For_or_Against'] = df['Action'].str.contains('UNION')
+        return df[['Time_Stamp', 'Action', 'For_or_Against']]
 
 # Example usage:
-html = """
+"""
 Your HTML table here
 """
-df = parse_html_table(html)
-print(df)
-
 
 
 '''
@@ -108,3 +106,7 @@ print(df)
                                                 <td aria-hidden="true" class="hide-on-large">Hanna, Nate at goalie for SUNY Oneonta</td>                                             
                                             </tr>
 '''
+
+if __name__ == "__main__":
+    gs = GameScraper()
+    
