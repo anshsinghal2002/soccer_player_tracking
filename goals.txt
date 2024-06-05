@@ -1,0 +1,6 @@
+- improved scraping so I can gather player details to add to visualization, and will also be useful for analysis. This additional data will also be stored in the Player object for now
+- scraping website for play-by-play to provide a label in the video
+- adding game start, half end, half start, game end to Field
+- start creating functions to extract statistical measures, discuss with nick
+- set up calls with lower division team data analysts, show them project so far, ask them what I could do beyond this point
+
