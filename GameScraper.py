@@ -34,14 +34,18 @@ class GameScraper():
 
     def extract_table(self,game_link):
         pass
+
     def parse_html_table(self,html):
         soup = BeautifulSoup(html, 'html.parser')
         rows = soup.find_all('tr')
+        print (rows)
 
         data = []
         for row in rows:
             cols = row.find_all('td')
+            print (cols)
             cols = [col.text.strip() for col in cols]
+            print (cols)
             data.append(cols)
 
         df = pd.DataFrame(data)
@@ -49,64 +53,4 @@ class GameScraper():
         df['For_or_Against'] = df['Action'].str.contains('UNION')
         return df[['Time_Stamp', 'Action', 'For_or_Against']]
 
-# Example usage:
-"""
-Your HTML table here
-"""
 
-
-'''
-<tr>
-                                                
-                                                    <td>
-                                                00:00
-                                                </td>
-                                                <td class="text-right hide-on-medium-down" style="width:40%">
-                                                    
-                                                </td>
-                                                
-                                                    <td class="hide-on-medium-down"></td>
-                                                    <td class="hide-on-medium-down"></td>
-                                                    <td class="hide-on-medium-down"></td>
-                                                
-                                                <td class="hide-on-medium-down" style="width:40%">
-                                                    Perry, Jacob at goalie for Union (NY)
-                                                </td>   
-                                                <td aria-hidden="true" class="hide-on-large text-center text-bold" style="min-width:50px">
-                                                    
-                                                </td>
-                                                
-                                                    <td aria-hidden="true" class="hide-on-large play team"></td>
-                                                
-                                                <td aria-hidden="true" class="hide-on-large">Perry, Jacob at goalie for Union (NY)</td>                                             
-                                            </tr>
-                                             
-                                            <tr>
-                                                
-                                                    <td>
-                                                00:00
-                                                </td>
-                                                <td class="text-right hide-on-medium-down" style="width:40%">
-                                                    Hanna, Nate at goalie for SUNY Oneonta
-                                                </td>
-                                                
-                                                    <td class="hide-on-medium-down"></td>
-                                                    <td class="hide-on-medium-down"></td>
-                                                    <td class="hide-on-medium-down"></td>
-                                                
-                                                <td class="hide-on-medium-down" style="width:40%">
-                                                    
-                                                </td>   
-                                                <td aria-hidden="true" class="hide-on-large text-center text-bold" style="min-width:50px">
-                                                    
-                                                </td>
-                                                
-                                                    <td aria-hidden="true" class="hide-on-large play "></td>
-                                                
-                                                <td aria-hidden="true" class="hide-on-large">Hanna, Nate at goalie for SUNY Oneonta</td>                                             
-                                            </tr>
-'''
-
-if __name__ == "__main__":
-    gs = GameScraper()
-    
