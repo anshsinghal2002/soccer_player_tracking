@@ -38,19 +38,26 @@ class GameScraper():
     def parse_html_table(self,html):
         soup = BeautifulSoup(html, 'html.parser')
         rows = soup.find_all('tr')
-        print (rows)
-
         data = []
-        for row in rows:
+        col_names = [th.text.strip() for th in rows[0].find_all('th')]
+        print (col_names)
+        print (len(rows))
+        for row in rows[1:]:
             cols = row.find_all('td')
-            print (cols)
+            # print (cols)
             cols = [col.text.strip() for col in cols]
-            print (cols)
+            # print (cols)
             data.append(cols)
 
         df = pd.DataFrame(data)
-        df = df.rename(columns={0: 'Time_Stamp', 1: 'Action'})
-        df['For_or_Against'] = df['Action'].str.contains('UNION')
-        return df[['Time_Stamp', 'Action', 'For_or_Against']]
+        print ({i:col_names[i] for i in range(9)})
+        df = df.rename(columns={i:col_names[i] for i in range(9)})
+        # df['For_or_Against'] = df['Action'].str.contains('UNION')
+        return df
 
 
+if __name__ == "__main__":
+    gs=GameScraper()
+    f = open('./sample_data/sample_play_by_play.html','r')
+    df = gs.parse_html_table(f.read())
+    print (df.head())
