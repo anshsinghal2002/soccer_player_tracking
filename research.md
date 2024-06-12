@@ -78,6 +78,43 @@
 
 **Concept:** During the knockout stages of FIFA World Cup Qatar 2022 the Technical Study Group observed and noted how teams that progressed to the latter stages of the tournament were demonstrating an ability and willingness to control the game without the ball for longer periods.
 
-**Summary:** [This FIFA article](https://www.fifatrainingcentre.com/en/fwc2022/technical-and-tactical-analysis/controlling-the-game-without-the-ball--the-mid-block-and-compactness.php#:~:text=The%20compactness%20of%20a%20team,to%20play%20between%20their%20lines.)
+**Summary:** [This FIFA article](https://www.fifatrainingcentre.com/en/fwc2022/technical-and-tactical-analysis/controlling-the-game-without-the-ball--the-mid-block-and-compactness.php#:~:text=The%20compactness%20of%20a%20team,to%20play%20between%20their%20lines.) defines phases of game which can be tagged as a midblock
+Definition of a midblock:
+
+- Team has been stationary for at least 1.6 seconds during the previous 2.0 seconds
+  - Stationary: players moving at less than 10km/h
+- Team has to form horizontal lines (except highest outfield player)
+- At least four defending players organised behind the ball and not meeting the criteria of a "Low-Block".
 
 **Suggested Work:**
+
+- Implement a classification model for the following out of possession phases:
+  - High Press
+  - Mid Press
+  - Low Press
+  - High-Block
+  - Mid-Block
+  - Low-Block
+  - Recovery
+  - Defensive Transition
+  - Counter Press.
+- Make a compactness visualization for the season similar to: <div style="text-align:center">
+<img src="./md_imgs/eg_compactness_chart.png" width="400"/>
+</div>
+
+---
+
+### Developing a tactical metric to estimate the defensive area of soccer teams: The defensive play area
+
+**Concept:** By studying the corelation between half outcomes and team-shape, evaluate a metric for defensive area coverage.
+
+**Summary:** [This article](https://journals.sagepub.com/doi/10.1177/1754337115583198?icid=int.sj-abstract.similar-articles.3#core-collateral-purchase-access) proposes a computational method to inspect the tactical position of players during the match and a new metric to analyse the defensive pressure made by a soccer team:
+
+- This metric is calculated at 1Hz
+- Is purely based on cartesian coordinates of players;
+
+Which is exactly what we have!
+
+**Suggested Work:**
+
+- Implement the described features.
