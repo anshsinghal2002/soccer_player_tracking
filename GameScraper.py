@@ -29,6 +29,9 @@ class GameScraper():
                 print("Failed to fetch data:", response.status_code)
     
     def play_by_play_scraper(self,game_link="https://unionathletics.com/sports/mens-soccer/stats/2023/-15-suny-oneonta/boxscore/25179"):
+        """
+        Given a link to a Union College Game box score, returns the play-by-play in the form of a DataFrame Obj
+        """
         html_tables = self.extract_table(game_link)
         first_half_plays = self.parse_html_table(html_tables[0])
         second_half_plays = self.parse_html_table(html_tables[1])
