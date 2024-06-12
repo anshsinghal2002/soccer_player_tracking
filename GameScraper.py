@@ -29,19 +29,26 @@ class GameScraper():
                 print("Failed to fetch data:", response.status_code)
     
     def play_by_play_scraper(self,game_link="https://unionathletics.com/sports/mens-soccer/stats/2023/-15-suny-oneonta/boxscore/25179"):
-        html_table = self.extract_table(game_link)
-        self.parse_html_table(html_table)
+        html_tables = self.extract_table(game_link)
+        first_half_plays = self.parse_html_table(html_tables[0])
+        second_half_plays = self.parse_html_table(html_tables[1])
+        return self.join_halves(first_half_plays,second_half_plays)
+    
+    def join_halves(self,half1,half2):
+        return pd.concat([half1,half2])
 
     def extract_table(self,game_link):
-        pass
+        response = requests.get(game_link)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        period_1_section = str(soup.find('section', id='period-1'))
+        period_2_section = str(soup.find('section', id='period-2'))
+        return period_1_section,period_2_section
 
     def parse_html_table(self,html):
         soup = BeautifulSoup(html, 'html.parser')
         rows = soup.find_all('tr')
         data = []
         col_names = [th.text.strip() for th in rows[0].find_all('th')]
-        print (col_names)
-        print (len(rows))
         for row in rows[1:]:
             cols = row.find_all('td')
             # print (cols)
@@ -50,14 +57,17 @@ class GameScraper():
             data.append(cols)
 
         df = pd.DataFrame(data)
-        print ({i:col_names[i] for i in range(9)})
+        # print ({i:col_names[i] for i in range(9)})
         df = df.rename(columns={i:col_names[i] for i in range(9)})
         # df['For_or_Against'] = df['Action'].str.contains('UNION')
         return df
 
 
 if __name__ == "__main__":
-    gs=GameScraper()
-    f = open('./sample_data/sample_play_by_play.html','r')
-    df = gs.parse_html_table(f.read())
-    print (df.head())
+    # gs=GameScraper()
+    # f = open('./sample_data/sample_play_by_play.html','r')
+    # df = gs.parse_html_table(f.read())
+    # print (df['UNION - Play Description'])
+    gs = GameScraper()
+    # f = open('./sample_data/sample_play_by_play.html','w')  
+    print(gs.play_by_play_scraper('https://unionathletics.com/sports/mens-soccer/stats/2023/ithaca/boxscore/25189'))
