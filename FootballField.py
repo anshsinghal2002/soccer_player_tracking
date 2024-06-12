@@ -163,7 +163,27 @@ class FootballField:
 
         # Save animation
         anim.save(path, writer=writer)
+    
+    def evaluate_defensive_line_height(self):
+        pass
 
+    def evaluate_team_length(self):
+        pass
+    
+    def evaluate_compactness(self):
+        pass
+    def evaluate_average_formation(self):
+        pass
+    def evaluate_third_breakdowns(self, vertical=False):
+        """
+        Present a visualization with a percentage breakdown of the vertical/horizontal thirds of the pitch
+        """
+        pass
+    def evaluate_average_team_height(self):
+        pass
+
+    def alter_match_times(self,actual_game_start="00:00",end_first_half="45:00",start_second_half="60:00",end_second_half="105:00"):
+        pass
 if __name__=="__main__":
     # Example usage:
     point1=(42.819707, -73.936629) #College Park Hall Field Coordinates
