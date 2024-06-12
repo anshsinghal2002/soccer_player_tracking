@@ -1,6 +1,7 @@
 
 import datetime
 import pandas as pd
+from Utils import seconds_to_minsec
 
 class Player:
   def __init__(self,player_name,raw_gps,init_time=None):
@@ -43,11 +44,7 @@ class Player:
     time_diff = datetime.datetime.combine(datetime.date.min, x) - datetime.datetime.combine(datetime.date.min, init_time)
 
     total_seconds = time_diff.total_seconds()
-    minutes = int(total_seconds // 60)
-    seconds = int(total_seconds % 60)
-    minute_second = "{:02d}:{:02d}".format(minutes, seconds)
-
-    return minute_second
+    return seconds_to_minsec(total_seconds)
   
 
 

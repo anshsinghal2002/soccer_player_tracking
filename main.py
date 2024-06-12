@@ -47,9 +47,9 @@ def load_config():
 
 def test_framework():
     token = load_config()['TOKEN']
-    sessionID=3533086
-    id_range = range(sessionID-100,sessionID+100)
-    play_by_play = "https://unionathletics.com/sports/mens-soccer/stats/2023/ithaca/boxscore/25189"
+    sessionID=3471220
+    id_range = range(sessionID-200,sessionID+200)
+    play_by_play = "https://unionathletics.com/sports/mens-soccer/stats/2023/elmira/boxscore/25193"
 
     #cph
     point1=(42.819707, -73.936629)
@@ -60,11 +60,14 @@ def test_framework():
     cph_field.draw_field_rotated()
 
     #ithica game
-    game_date = datetime.datetime(2023, 10, 13)
-    init_time = datetime.time(16,00)
+    game_date = datetime.datetime(2023, 10, 3)
+    init_time = datetime.time(17,00)
     scraper = GameScraper()
     scraper.game_scraper(token,id_range,game_date,cph_field,init_time)
-    save(cph_field,'sample_filled_field_cph.pkl')
+    print (cph_field.coordinate_frame.head)
+    save(cph_field,'./sample_data/ithica_game.pkl')
+
+    # Based on video: game_start = 5', half_end = 53', half start = 69', game_end=118'
     return cph_field
 
 if __name__=="__main__":
@@ -75,4 +78,4 @@ if __name__=="__main__":
     # cph_field = pickle.load(f)
     # cph_field.animate_field('cph_vs_acp.mp4')
     cph_field = test_framework()
-    cph_field.animate_field('cph_vs_ithica.mp4')
+    cph_field.animate_field('./sample_outputs/cph_vs_elmira.mp4')

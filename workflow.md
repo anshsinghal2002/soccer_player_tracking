@@ -25,14 +25,12 @@ This is a brief overview of how you would go about utilizing the wrapper classes
 
 ## Tips and Considerations
 
-- Any tips or considerations to keep in mind while following the workflow.
-- Additional resources or links for further information.
+- Once real time match half start/end are recorded, FootbalField implementation should be updated to cater to both halves separately to accomodate for added time in first half.
 
 ## Troubleshooting
 
-- Common issues users might encounter and how to resolve them.
-- Troubleshooting tips or techniques.
+- Looking into why some phases of the game do not showcase all 10 outfield players; missing data from PlayerTek modules or players who weren't given one on the pitch at certain times.
 
 ## Conclusion
 
-Summarize the workflow and highlight any key points or takeaways.
+This is the beginning of an exciting project. There are lots of cool directions that data insight can take with the data available at Union's Soccer team, and building off of this ground level implementation, solidifying data collection pipelines and practices will make for an abundant amount of reliable data and feature generation which will allow for a plethora of fruitful visualizations and metric revelations for the Soccer team in coming years.
