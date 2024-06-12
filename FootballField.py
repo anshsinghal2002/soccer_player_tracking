@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import patches
 from matplotlib import animation
+from GameScraper import GameScraper
 
 
 class FootballField:
@@ -14,7 +15,7 @@ class FootballField:
     - calculate_tilt(): initialises a rotational matrix whose angle is calculated using the tilt of the field
     - add_player_data(player_data): takes a df with columns [latitude,longitude] and rows with minute:second timestamped data. Merges latitude, longitude cols into one column (longitude,latitude) with the name <player_name>, drops original and joins <player_name> series along time_stamp, and
     """
-    def __init__(self, point1, point2, point3, point4):
+    def __init__(self, point1, point2, point3, point4,link=None):
         self.points = [(x,y) for y,x in [point1, point2, point3, point4]] #flipping latitude-longitude to x,y
         self.coordinate_frame = pd.DataFrame({'Minute:Second':["{:02d}:{:02d}".format(minutes, seconds) for minutes in range(0,60) for seconds in range(0,150)]})
         self.players={}
@@ -25,6 +26,8 @@ class FootballField:
         self.translated_points = [self.translate_point(point) for point in self.points] #
         self.rotated_points = [self.rotate_point(point) for point in self.translated_points]
         self.fig,self.ax = plt.subplots(figsize=(12, 9))
+        if link!=None:
+            self.add_play_by_play(link)
 
     def calculate_rectangle(self):
         """
@@ -163,7 +166,20 @@ class FootballField:
 
         # Save animation
         anim.save(path, writer=writer)
-    
+
+    def add_play_by_play(self,play_by_play_link):
+        """
+        Adds play_by_play data to the field object
+        play_by_play df must be derived from GameSraper.play_by_play_scraper(link)
+        """
+        self.has_play_by_play = True
+        gs = GameScraper()
+        try:
+            self.play_by_play = gs.play_by_play_scraper(play_by_play_link)
+        except:
+            print ("Could not scrape play by play")
+            self.has_play_by_play = False
+
     def evaluate_defensive_line_height(self):
         pass
 
