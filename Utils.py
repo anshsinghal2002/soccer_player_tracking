@@ -4,3 +4,6 @@ def seconds_to_minsec(total_seconds):
     minute_second = "{:02d}:{:02d}".format(minutes, seconds)
 
     return minute_second
+
+if __name__=="__main__":
+    print (seconds_to_minsec(1880))

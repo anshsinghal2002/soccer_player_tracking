@@ -199,18 +199,23 @@ class FootballField:
         pass
 
     def alter_match_times(self,actual_game_start="00:00",end_first_half="45:00",start_second_half="60:00",end_second_half="105:00"):
+        self.coordinate_frame = self.coordinate_frame[self.coordinate_frame['Minute:Second'].str.split(':').str[1].astype(int) <= 59]
         game_start_adjustment = self.timestamp_to_seconds(actual_game_start)
         first_half_end_seconds = self.timestamp_to_seconds(end_first_half)
         start_second_half_adjustment = self.timestamp_to_seconds(start_second_half)
         game_end_seconds = self.timestamp_to_seconds(end_second_half)
         self.coordinate_frame['timestamp']=self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x))
-        first_half = self.coordinate_frame[(self.coordinate_frame['timestamp']>game_start_adjustment)&(self.coordinate_frame['timestamp']<game_start_adjustment+45*60)]
+        first_half = self.coordinate_frame[(self.coordinate_frame['timestamp']>=game_start_adjustment)&(self.coordinate_frame['timestamp']<game_start_adjustment+45*60)]
+        print (first_half)
         first_half['timestamp']=first_half['timestamp'].apply(lambda x: x-game_start_adjustment)
         first_half['Minute:Second']=first_half['timestamp'].apply(lambda x: seconds_to_minsec(x))
-        second_half = self.coordinate_frame[(self.coordinate_frame['timestamp']>start_second_half_adjustment)&(self.coordinate_frame['timestamp']<start_second_half_adjustment+45*60)]
+        print (first_half)
+        second_half = self.coordinate_frame[(self.coordinate_frame['timestamp']>=start_second_half_adjustment)&(self.coordinate_frame['timestamp']<start_second_half_adjustment+45*60)]
         second_half['timestamp']=second_half['timestamp'].apply(lambda x: x-start_second_half_adjustment+45*60)
         second_half['Minute:Second']=second_half['timestamp'].apply(lambda x: seconds_to_minsec(x))
-        self.coordinate_frame = pd.concat([first_half,second_half])
+        print (second_half)
+        self.coordinate_frame = first_half #pd.concat([first_half,second_half])
+
 if __name__=="__main__":
     # Example usage:
     point1=(42.819707, -73.936629) #College Park Hall Field Coordinates
