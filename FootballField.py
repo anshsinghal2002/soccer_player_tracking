@@ -28,6 +28,8 @@ class FootballField:
         self.fig,self.ax = plt.subplots(figsize=(12, 9))
         if link!=None:
             self.add_play_by_play(link)
+        else:
+            self.has_play_by_play=False
 
     def calculate_rectangle(self):
         """
@@ -101,7 +103,12 @@ class FootballField:
         self.ax.add_patch(center_circle)
         self.ax.add_patch(left_penalty_area)
         self.ax.add_patch(right_penalty_area)
-        
+        min_x = min([point[0] for point in self.rotated_points])
+        max_x = max([point[0] for point in self.rotated_points])
+        min_y = min([point[1] for point in self.rotated_points])
+        max_y = max([point[1] for point in self.rotated_points])
+        self.ax.set_xlim(min_x,max_x)
+        self.ax.set_ylim(min_y,max_y)
 
         if show:
             plt.show()
@@ -152,9 +159,11 @@ class FootballField:
             return mins*60+seconds
         
     def animate_field(self, path,speed_up=1):
- 
+        
+        previous_notification = ""
         # Function to update each frame
         def update(frame):
+            nonlocal previous_notification
             self.ax.clear()
             minutes = int(frame // 60)
             seconds = int(frame % 60)
@@ -162,11 +171,23 @@ class FootballField:
             print(minute_second)
             self.draw_field_at_time(minute_second,show=False)
 
+            play_text.set_text(current_notification[0])
+            self.ax.add_artist(play_text)
+
+            # Check if there is a play-by-play entry for the current timestamp
+            if self.has_play_by_play and minute_second in self.play_by_play['Clock'].values:
+                play_desc = self.play_by_play.loc[self.play_by_play['Clock'] == minute_second, 'Play'].values[0]
+                current_notification[0] = f"{minute_second} - {play_desc}"
+
         # Calculate frames and interval
 
         frames = min(self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x)).max(),140*60)
         print ("Total Frames: ",frames)
         interval = 1000 // (30 * speed_up)  # Adjust interval for speed up
+
+        # Create a text element for play-by-play notifications
+        current_notification = [""]  # List to retain notification text across frames
+        play_text = self.ax.text(0.02, 0.95, 'test', transform=self.ax.transAxes, fontsize=12, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
 
         # Create animation
         anim = animation.FuncAnimation(self.fig, update, frames=frames, interval=interval, repeat=False)

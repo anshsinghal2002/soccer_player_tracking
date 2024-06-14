@@ -77,5 +77,6 @@ if __name__=="__main__":
     cph_field = pickle.load(f)
     # cph_field = test_framework()
     cph_field.alter_match_times("5:00","53:00","69:00","118:00")
-    cph_field.animate_field('./sample_outputs/elmiras_altered_time.mp4')
+    # print(cph_field.play_by_play)
+    cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4')
     # cph_field = test_framework()
