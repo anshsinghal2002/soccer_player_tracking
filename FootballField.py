@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 from matplotlib import animation
 from GameScraper import GameScraper
-from Utils import seconds_to_minsec
+from Utils import seconds_to_minsec,coordinates_to_meters
 
 class FootballField:
     """
@@ -90,9 +90,19 @@ class FootballField:
     def draw_field_rotated(self,show=False):
         # fig, ax = plt.subplots()
         rect = patches.Rectangle((self.rotated_points[3][0], self.rotated_points[3][1]), self.field_len,self.field_wid,  facecolor='green', edgecolor='black',alpha=0.5)
+        center_circle = patches.Circle((sum([i[0] for i in self.rotated_points])/4, sum([i[1] for i in self.rotated_points])/4), self.field_wid / 10, color='white', fill=False)
         halfway_point = (self.rotated_points[2][0]+self.rotated_points[3][0])/2
+        penalty_area_height = 0.15*self.field_len
+        penalty_area_width = 0.4*self.field_wid
+        left_penalty_area = patches.Rectangle((self.rotated_points[3][0], self.field_wid/2-penalty_area_width/2), penalty_area_height, penalty_area_width, edgecolor='white', fill=False)
+        right_penalty_area = patches.Rectangle((self.rotated_points[1][0] - penalty_area_height, self.field_wid/2-penalty_area_width/2), penalty_area_height, penalty_area_width, edgecolor='white', fill=False)
         self.ax.plot([halfway_point,halfway_point], [self.rotated_points[0][1], self.rotated_points[2][1]], color='white')
         self.ax.add_patch(rect)
+        self.ax.add_patch(center_circle)
+        self.ax.add_patch(left_penalty_area)
+        self.ax.add_patch(right_penalty_area)
+        
+
         if show:
             plt.show()
 
@@ -180,7 +190,12 @@ class FootballField:
             print ("Could not scrape play by play")
             self.has_play_by_play = False
 
-    def evaluate_defensive_line_height(self):
+    def init_metrics_table(self):
+        self.metrics = pd.DataFrame({'Minute:Second':["{:02d}:{:02d}".format(minutes, seconds) for minutes in range(0,150) for seconds in range(0,60)]})
+
+    def evaluate_defensive_line_height(self,first_half_left=True):
+        # if first_half_left:
+        #     self.coordinate_frame['']
         pass
 
     def evaluate_team_length(self):
@@ -200,21 +215,23 @@ class FootballField:
 
     def alter_match_times(self,actual_game_start="00:00",end_first_half="45:00",start_second_half="60:00",end_second_half="105:00"):
         self.coordinate_frame = self.coordinate_frame[self.coordinate_frame['Minute:Second'].str.split(':').str[1].astype(int) <= 59]
+
         game_start_adjustment = self.timestamp_to_seconds(actual_game_start)
         first_half_end_seconds = self.timestamp_to_seconds(end_first_half)
         start_second_half_adjustment = self.timestamp_to_seconds(start_second_half)
         game_end_seconds = self.timestamp_to_seconds(end_second_half)
+
         self.coordinate_frame['timestamp']=self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x))
         first_half = self.coordinate_frame[(self.coordinate_frame['timestamp']>=game_start_adjustment)&(self.coordinate_frame['timestamp']<game_start_adjustment+45*60)]
-        print (first_half)
+
         first_half['timestamp']=first_half['timestamp'].apply(lambda x: x-game_start_adjustment)
         first_half['Minute:Second']=first_half['timestamp'].apply(lambda x: seconds_to_minsec(x))
-        print (first_half)
+
         second_half = self.coordinate_frame[(self.coordinate_frame['timestamp']>=start_second_half_adjustment)&(self.coordinate_frame['timestamp']<start_second_half_adjustment+45*60)]
         second_half['timestamp']=second_half['timestamp'].apply(lambda x: x-start_second_half_adjustment+45*60)
         second_half['Minute:Second']=second_half['timestamp'].apply(lambda x: seconds_to_minsec(x))
-        print (second_half)
-        self.coordinate_frame = first_half #pd.concat([first_half,second_half])
+
+        self.coordinate_frame = pd.concat([first_half,second_half])
 
 if __name__=="__main__":
     # Example usage:

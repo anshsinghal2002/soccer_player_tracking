@@ -64,8 +64,7 @@ def test_framework():
     init_time = datetime.time(17,00)
     scraper = GameScraper()
     scraper.game_scraper(token,id_range,game_date,cph_field,init_time)
-    print (cph_field.coordinate_frame.head)
-    save(cph_field,'./sample_data/ithica_game.pkl')
+    save(cph_field,'./sample_data/elmira_game.pkl')
 
     # Based on video: game_start = 5', half_end = 53', half start = 69', game_end=118'
     return cph_field
@@ -74,9 +73,9 @@ if __name__=="__main__":
     # test_field_animation()
     # cph_field = test_scraping(load_config()['TOKEN'])
     # save(cph_field,'sample_filled_field_cph.pkl')
-    f = open('./sample_data/sample_filled_field_cph.pkl','rb')
+    f = open('./sample_data/elmira_game.pkl','rb')
     cph_field = pickle.load(f)
-    cph_field.alter_match_times("5:00","53:00","69:00","118:00")
-    cph_field.animate_field('halves_test.mp4')
     # cph_field = test_framework()
-    # cph_field.animate_field('./sample_outputs/cph_vs_elmira.mp4')
+    cph_field.alter_match_times("5:00","53:00","69:00","118:00")
+    cph_field.animate_field('./sample_outputs/elmiras_altered_time.mp4')
+    # cph_field = test_framework()

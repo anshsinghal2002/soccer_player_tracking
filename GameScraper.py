@@ -19,7 +19,7 @@ class GameScraper():
                 try:
                     player_csv = pd.read_csv(csv_file)
                     player_to_add = Player('player_'+str(session_id),player_csv,init_time)
-                    print(player_to_add.data['Minute:Second'].min())
+
                     # if player_to_add.game_date==game_date:
                     field.add_player_data(player_to_add)
                 except Exception as e:
