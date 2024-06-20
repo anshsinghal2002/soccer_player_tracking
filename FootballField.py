@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 from matplotlib import animation
 from GameScraper import GameScraper
-from Utils import seconds_to_minsec,coordinates_to_meters
+from Utils import seconds_to_minsec,coordinates_to_yds
 
 class FootballField:
     """
@@ -26,6 +26,7 @@ class FootballField:
         self.translated_points = [self.translate_point(point) for point in self.points] #
         self.rotated_points = [self.rotate_point(point) for point in self.translated_points]
         self.fig,self.ax = plt.subplots(figsize=(12, 9))
+        self.init_metrics_table
         if link!=None:
             self.add_play_by_play(link)
         else:
@@ -142,12 +143,13 @@ class FootballField:
             except Exception as e:
                 pass
         self.fig.suptitle(f'Field at {time_stamp}')
+       
         if show:
             plt.show()
 
     def draw_player_at_time(self,time_stamp,player_name):
         xy = self.coordinate_frame.loc[self.coordinate_frame['Minute:Second'] == time_stamp][player_name].values
-        self.ax.plot([x for x,_ in xy],[y for _,y in xy], marker='.', markersize=10, linestyle='-', linewidth=1, label=player_name)
+        self.ax.plot([x for x,_ in xy],[y for _,y in xy], marker='.', markersize=15, linestyle='-', linewidth=1, label=player_name)
 
     def timestamp_to_seconds(self,x):
         mins,seconds=x.split(':')
@@ -158,7 +160,7 @@ class FootballField:
         else:
             return mins*60+seconds
         
-    def animate_field(self, path,speed_up=1):
+    def animate_field(self, path,speed_up=1,max_frames=140*60,show_def_line=False):
         
         previous_notification = ""
         # Function to update each frame
@@ -173,22 +175,30 @@ class FootballField:
 
             play_text.set_text(current_notification[0])
             self.ax.add_artist(play_text)
-
+            
             # Check if there is a play-by-play entry for the current timestamp
             if self.has_play_by_play and minute_second in self.play_by_play['Clock'].values:
                 play_desc = self.play_by_play.loc[self.play_by_play['Clock'] == minute_second, 'Play'].values[0]
                 current_notification[0] = f"{minute_second} - {play_desc}"
 
+            if show_def_line:
+                if 'def_line_height' in self.coordinate_frame:
+                    def_height = self.coordinate_frame['def_line_height'].iloc[frame]
+                    if not pd.isna(def_height):
+                        self.ax.axvline(x=def_height, color='red', linestyle='--', linewidth=2)
+                        self.ax.text(0.5, def_height, ' Defensive Line ', color='red', fontsize=12, ha='center', va='center')
+
+
         # Calculate frames and interval
 
-        frames = min(self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x)).max(),140*60)
+        frames = min(self.coordinate_frame['Minute:Second'].apply(lambda x: self.timestamp_to_seconds(x)).max(),max_frames)
         print ("Total Frames: ",frames)
         interval = 1000 // (30 * speed_up)  # Adjust interval for speed up
 
         # Create a text element for play-by-play notifications
         current_notification = [""]  # List to retain notification text across frames
         play_text = self.ax.text(0.02, 0.95, 'test', transform=self.ax.transAxes, fontsize=12, verticalalignment='top', bbox=dict(facecolor='white', alpha=0.5))
-
+       
         # Create animation
         anim = animation.FuncAnimation(self.fig, update, frames=frames, interval=interval, repeat=False)
         # plt.show()
@@ -211,21 +221,94 @@ class FootballField:
             print ("Could not scrape play by play")
             self.has_play_by_play = False
 
+    def clean_coordinate_frame(self, threshold=0.00065):
+        """
+        Sets all entries in the coordinate frame with a y-coordinate value greater than the threshold to NaN.
+        Accounts for substitute bench. Reduces to only on-field players for easier metric extraction.
+        """
+        def clean_value(value):
+            if value[1] > threshold:
+                return np.nan
+            return value
+
+        for player_name in self.players:
+            self.coordinate_frame[player_name] = self.coordinate_frame[player_name].apply(clean_value)    
+
     def init_metrics_table(self):
         self.metrics = pd.DataFrame({'Minute:Second':["{:02d}:{:02d}".format(minutes, seconds) for minutes in range(0,150) for seconds in range(0,60)]})
 
     def evaluate_defensive_line_height(self,first_half_left=True):
-        # if first_half_left:
-        #     self.coordinate_frame['']
-        pass
+
+        def calculate_defensive_height(row):
+            timestamp_seconds = self.timestamp_to_seconds(row['Minute:Second'])
+            # x_coords = [
+            #     row[player_name][0]
+            #     for player_name in self.players
+            #     if isinstance(row[player_name], tuple)]
+            x_coords=[]
+            for player_name in self.players:
+                try:
+                    x_coords.append(row[player_name][0])
+                except:
+                    pass
+            if first_half_left:
+                if timestamp_seconds <= 45 * 60:
+                    return min(x_coords)
+                else:
+                    return max(x_coords)
+            else:
+                if timestamp_seconds <= 45 * 60:
+                    return max(x_coords)
+                else:
+                    return min(x_coords)
+        
+        self.coordinate_frame['def_line_height'] = self.coordinate_frame.apply(calculate_defensive_height, axis=1)
+
 
     def evaluate_team_length(self):
-        pass
+        def calculate_team_length(row):
+            timestamp_seconds = self.timestamp_to_seconds(row['Minute:Second'])
+            # x_coords = [
+            #     row[player_name][0]
+            #     for player_name in self.players
+            #     if isinstance(row[player_name], tuple)]
+            x_coords=[]
+            for player_name in self.players:
+                try:
+                    x_coords.append(row[player_name][0])
+                except:
+                    pass
+            return coordinates_to_yds(max(x_coords)-min(x_coords))
+        
+        self.coordinate_frame['team_len'] = self.coordinate_frame.apply(calculate_team_length, axis=1)
     
-    def evaluate_compactness(self):
-        pass
+    def evaluate_team_width(self):
+        def calculate_team_width(row):
+            timestamp_seconds = self.timestamp_to_seconds(row['Minute:Second'])
+            y_coords=[]
+            for player_name in self.players:
+                try:
+                    y_coords.append(row[player_name][1])
+                except:
+                    pass
+            return coordinates_to_yds(max(y_coords)-min(y_coords))
+        
+        self.coordinate_frame['team_wid'] = self.coordinate_frame.apply(calculate_team_width, axis=1)
+
+    def generate_binary_columns(self):
+        self.play_by_play['union_goal'] = (self.play_by_play['Union - Play Description'].notnull()) & (self.play_by_play['Play'].str.contains('GOAL', case=False))
+        self.play_by_play['away_goal'] = (self.play_by_play['Union - Play Description'].isnull()) & (self.play_by_play['Play'].str.contains('GOAL', case=False))
+        self.play_by_play['union_shot'] = (self.play_by_play['Union - Play Description'].notnull()) & (self.play_by_play['Play'].str.contains('shot', case=False))
+        self.play_by_play['away_shot'] = (self.play_by_play['Union - Play Description'].isnull()) & (self.play_by_play['Play'].str.contains('shot', case=False))
+
+        binary_columns = ['union_goal', 'away_goal', 'union_shot', 'away_shot']
+        self.play_by_play[binary_columns] = self.play_by_play[binary_columns].astype(int)
+
+        print(self.play_by_play)
+
     def evaluate_average_formation(self):
         pass
+
     def evaluate_third_breakdowns(self, vertical=False):
         """
         Present a visualization with a percentage breakdown of the vertical/horizontal thirds of the pitch

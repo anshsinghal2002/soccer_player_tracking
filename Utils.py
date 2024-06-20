@@ -5,8 +5,8 @@ def seconds_to_minsec(total_seconds):
 
     return minute_second
 
-def coordinates_to_meters(coord_length):
-    return coord_length*111320
+def coordinates_to_yds(coord_length):
+    return coord_length*91666
 
 if __name__=="__main__":
     print (seconds_to_minsec(1880))

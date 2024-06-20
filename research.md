@@ -2,25 +2,7 @@
 
 ## Related Papers
 
----
 
-### Title
-
-**Concept:** Concept
-
-**Summary:** [Link](https://www.mdpi.com/2075-4663/6/4/130)
-
-**Suggested Work:**
-
----
-
-### Title
-
-**Concept:** Concept
-
-**Summary:** [Link](https://ieeexplore.ieee.org/abstract/document/8336015)
-
-**Suggested Work:**
 
 ---
 

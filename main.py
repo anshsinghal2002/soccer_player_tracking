@@ -69,14 +69,26 @@ def test_framework():
     # Based on video: game_start = 5', half_end = 53', half start = 69', game_end=118'
     return cph_field
 
+def test_animation_and_metrics():
+    f = open('./sample_data/elmira_game.pkl','rb')
+    cph_field = pickle.load(f)
+    cph_field.alter_match_times("5:00","53:00","69:00","118:00")
+    cph_field.clean_coordinate_frame()
+    cph_field.init_metrics_table()
+    cph_field.evaluate_defensive_line_height()
+    cph_field.evaluate_team_length()
+    # cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4',show_def_line=True)
+    print(cph_field.generate_binary_columns())
+
 if __name__=="__main__":
     # test_field_animation()
     # cph_field = test_scraping(load_config()['TOKEN'])
     # save(cph_field,'sample_filled_field_cph.pkl')
-    f = open('./sample_data/elmira_game.pkl','rb')
-    cph_field = pickle.load(f)
+    # f = open('./sample_data/elmira_game.pkl','rb')
+    # cph_field = pickle.load(f)
+    # # cph_field = test_framework()
+    # cph_field.alter_match_times("5:00","53:00","69:00","118:00")
+    # # print(cph_field.play_by_play)
+    # cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4')
     # cph_field = test_framework()
-    cph_field.alter_match_times("5:00","53:00","69:00","118:00")
-    # print(cph_field.play_by_play)
-    cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4')
-    # cph_field = test_framework()
+    test_animation_and_metrics()
