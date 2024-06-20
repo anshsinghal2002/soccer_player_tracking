@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 from matplotlib import animation
 from GameScraper import GameScraper
+import pickle
 from Utils import seconds_to_minsec,coordinates_to_yds
 
 class FootballField:
@@ -255,10 +256,10 @@ class FootballField:
                 if timestamp_seconds <= 45 * 60:
                     return min(x_coords)
                 else:
-                    return max(x_coords)
+                    return self.field_len-max(x_coords)
             else:
                 if timestamp_seconds <= 45 * 60:
-                    return max(x_coords)
+                    return self.field_len-max(x_coords)
                 else:
                     return min(x_coords)
         
@@ -281,7 +282,14 @@ class FootballField:
             return coordinates_to_yds(max(x_coords)-min(x_coords))
         
         self.coordinate_frame['team_len'] = self.coordinate_frame.apply(calculate_team_length, axis=1)
+
+    def reorder_df(self):
+        df_sorted = self.coordinate_frame.sort_values(by='timestamp')
+        
+        df_sorted = df_sorted.reset_index(drop=True)
     
+        self.coordinate_frame = df_sorted
+
     def evaluate_team_width(self):
         def calculate_team_width(row):
             timestamp_seconds = self.timestamp_to_seconds(row['Minute:Second'])
@@ -296,8 +304,8 @@ class FootballField:
         self.coordinate_frame['team_wid'] = self.coordinate_frame.apply(calculate_team_width, axis=1)
 
     def generate_binary_columns(self):
-        self.play_by_play['union_goal'] = (self.play_by_play['Union - Play Description'].notnull()) & (self.play_by_play['Play'].str.contains('GOAL', case=False))
-        self.play_by_play['away_goal'] = (self.play_by_play['Union - Play Description'].isnull()) & (self.play_by_play['Play'].str.contains('GOAL', case=False))
+        self.play_by_play['union_goal'] = (self.play_by_play['Union - Play Description'].notnull()) & (self.play_by_play['Play'].str.contains('GOAL', case=True))
+        self.play_by_play['away_goal'] = (self.play_by_play['Union - Play Description'].isnull()) & (self.play_by_play['Play'].str.contains('GOAL', case=True))
         self.play_by_play['union_shot'] = (self.play_by_play['Union - Play Description'].notnull()) & (self.play_by_play['Play'].str.contains('shot', case=False))
         self.play_by_play['away_shot'] = (self.play_by_play['Union - Play Description'].isnull()) & (self.play_by_play['Play'].str.contains('shot', case=False))
 
@@ -305,6 +313,51 @@ class FootballField:
         self.play_by_play[binary_columns] = self.play_by_play[binary_columns].astype(int)
 
         print(self.play_by_play)
+
+    def generate_metric_graph(self, metric_name):
+        """
+        Given a metric, plots a time vs metric graph for the entirety of the game, and uses the binary columns from the play_by_play to show in game actions with their corresponding time_stamps
+        For a Union Goal, a G appears above the metric line in Red, for an away goal a G appears above the metric line in black
+        """
+        metric_table = self.coordinate_frame[['Minute:Second', 'timestamp', metric_name]].copy()
+        
+        metric_table['timestamp'] = metric_table['Minute:Second'].apply(self.timestamp_to_seconds)
+        
+        metric_table['minute'] = metric_table['timestamp'] // 60
+        
+        # Aggregate metric_name by 'minute' and calculate mean
+        metric_table = metric_table.groupby('minute').agg({metric_name: 'mean'}).reset_index()
+
+        binary_columns = ['union_goal', 'away_goal', 'union_shot', 'away_shot']
+        self.play_by_play['minute']=self.play_by_play['Clock'].apply(lambda x: int(x.split(':')[0]))
+        play_by_play_aggregated = self.play_by_play.groupby('minute')[binary_columns].sum().reset_index()
+
+        
+        # Plot the graph
+        plt.figure(figsize=(12, 6))
+        plt.plot(metric_table['minute'], metric_table[metric_name], linestyle='-', color='blue', label=f'Average {metric_name}')
+        plt.axvline(x=45, color='b', linestyle='--', linewidth=1.5, label='Halftime')
+        goals_scored=0
+        goals_conceded=0
+        for idx, row in play_by_play_aggregated.iterrows():
+            minute = row['minute']
+            if row['union_goal'] > 0:
+                goals_scored+=1
+                plt.axvline(x=minute, linestyle='--', color='g',linewidth=1.5, label=f'{goals_scored}-{goals_conceded}')
+            if row['away_goal'] > 0:
+                goals_conceded+=1
+                plt.axvline(x=minute, linestyle='--', color='r',linewidth=1.5, label=f'{goals_scored}-{goals_conceded}')
+
+        plt.xlabel('Minute')
+        plt.ylabel(metric_name)
+        plt.title(f'Minute vs {metric_name} Graph')
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.show()
+
+    def evaluate_metrics(self):
+        self.evaluate_defensive_line_height()
+        self.evaluate_team_length()
+        self.evaluate_team_width()
 
     def evaluate_average_formation(self):
         pass
@@ -339,11 +392,12 @@ class FootballField:
 
 if __name__=="__main__":
     # Example usage:
-    point1=(42.819707, -73.936629) #College Park Hall Field Coordinates
-    point2=(42.820238, -73.935354)
-    point3=(42.819647, -73.934901)
-    point4=(42.819106, -73.936110)
-
-    field = FootballField(point1, point2, point3, point4)
-
-    field.draw_field_rotated(show=True)
+    f = open('./sample_data/elmira_game.pkl','rb')
+    cph_field = pickle.load(f)
+    cph_field.alter_match_times("5:00","53:00","69:00","118:00")
+    cph_field.clean_coordinate_frame()
+    cph_field.evaluate_metrics()
+    # cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4',show_def_line=True)
+    cph_field.reorder_df()
+    cph_field.generate_binary_columns()
+    cph_field.generate_metric_graph('def_line_height')

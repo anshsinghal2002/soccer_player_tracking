@@ -77,8 +77,8 @@ def test_animation_and_metrics():
     cph_field.init_metrics_table()
     cph_field.evaluate_defensive_line_height()
     cph_field.evaluate_team_length()
-    # cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4',show_def_line=True)
-    print(cph_field.generate_binary_columns())
+    cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4',show_def_line=True)
+
 
 if __name__=="__main__":
     # test_field_animation()
