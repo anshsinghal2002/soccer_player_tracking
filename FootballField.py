@@ -314,7 +314,7 @@ class FootballField:
 
         print(self.play_by_play)
 
-    def generate_metric_graph(self, metric_name):
+    def generate_metric_graph(self, metric_name,save_path=None):
         """
         Given a metric, plots a time vs metric graph for the entirety of the game, and uses the binary columns from the play_by_play to show in game actions with their corresponding time_stamps
         For a Union Goal, a G appears above the metric line in Red, for an away goal a G appears above the metric line in black
@@ -352,6 +352,11 @@ class FootballField:
         plt.ylabel(metric_name)
         plt.title(f'Minute vs {metric_name} Graph')
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        
+        # Save the plot if a save_path is provided
+        if save_path:
+            plt.savefig(save_path, bbox_inches='tight')
+        
         plt.show()
 
     def evaluate_metrics(self):
@@ -400,4 +405,5 @@ if __name__=="__main__":
     # cph_field.animate_field('./sample_outputs/elmiras_with_notifs.mp4',show_def_line=True)
     cph_field.reorder_df()
     cph_field.generate_binary_columns()
-    cph_field.generate_metric_graph('def_line_height')
+    for metric in ['def_line_height','team_len','team_wid']:
+        cph_field.generate_metric_graph(metric,f'./sample_outputs/{metric}_vs_elmira_graph')

@@ -26,4 +26,6 @@ Over the course of this indpendent study I was able to accomplish the following:
   - **Delivered end-to-end functionality** and produced a workflow to go from one link to a fully loaded in session with available metrical insights through auto generated graphs, and a robust video containing a display of all available metrics, birds eye view game replay, in game action notifications. Workflow described in `workflow.md`.
   - **Documented** iterations of various outputs, and sample data for ready testing and further development. (Sample outputs pertaining to Elmiras vs Union at CPH Field (Union) which ended in a 5-0 win for Union)
   - **Prepared** examples of usage in `main.py`.
+- My recommendation for the project would be to allow one or two students to come in and get onboarded to the project, which I would be happy to do. They can then utilise this codebase and the resarch as tools to produce analytical insights, as well as develop and engineer more features (also listed in `research.md`) for on pitch performance. Getting new sources of data through video recordings and manual annotation might also unlock a lot of potential, especially when discerning between phases of play in and out of possession.
+- **P.s. `research.md` for other suggested future work**
 
